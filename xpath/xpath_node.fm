@@ -1,0 +1,27 @@
+load xpath_base.fm
+
+(omod XPATH-NODE is
+pr XPATH-BASE .
+
+var node : Node .
+var tid seqn num : Nat .	 
+var ns1 : NodeSequence .
+var stackid : Oid .
+var n : Int .
+var nid : Oid .
+
+--- TODO DODELAT :-) OUYEEEE
+rl [constructor-element] :
+	(tid, num)[[ node ]]
+   < tid : LState | seq : seqn >
+	=> 
+	< tid : LState | seq : seqn + 1 >
+	mnode(tid, node, seqn) .
+			
+rl [mnode] :
+   mnode(tid, node, num)
+   < tid : LState | seq : seqn, (res : ns1) >
+   => 
+   < tid : LState | seq : seqn,(res : (ns1 node)) >
+.
+endom)

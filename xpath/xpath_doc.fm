@@ -1,0 +1,39 @@
+load xpath_base.fm
+
+(omod XPATH-DOC is
+pr XPATH-BASE .
+
+var tid seqn num : Nat .	 
+var ns1 : NodeSequence .
+var gsid : Oid .
+var doc-uri : Uri . 
+var d : Document .
+var stackid : Oid .
+var n : Int .
+var nid : Oid .
+
+--- eq [[ doc(doc-uri) ]](transaction(tid), seqn) = mdoc(tid, doc-uri, seqn) .
+rl [doc-rule] :
+	(tid, num)[[ doc(doc-uri) ]]
+   < tid : LState | seq : seqn, stack : stackid >
+   < stackid : Stack{Nat} | first : o(stackid, n) >
+   < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+   => 
+	< tid : LState | seq : seqn + 1 >
+    < stackid : Stack{Nat} | first : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn, next : nid >
+	mdoc(tid, doc-uri, seqn) .
+
+crl [mdoc] :
+	mdoc(tid, doc-uri, num)
+	< tid : LState | seq : seqn, (res : ns1), gs : gsid, stack : stackid >
+    < gsid : GState | database : database(d) >
+    < stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+	< tid : LState | seq : seqn + 1, (res : (ns1 d)) >
+    < stackid : Stack{Nat} | first : nid >	
+	< gsid : GState | database : database(d) >	
+	if dm:document-uri(d) == doc-uri .
+
+endom)

@@ -1,0 +1,170 @@
+--- load xdm_sequence.maude
+
+(fmod XDM is
+	pr STRING .
+	pr QID .
+	sorts Node Document Attribute Element Text NilNode AType Item Ref .
+	sorts untypedAtomic .
+	subsorts NilNode < Node .
+	subsorts Ref < Node .
+	subsorts Node < Item .
+	subsorts AType < Item .
+	subsorts Document Attribute Element Text < Node .
+	subsorts untypedAtomic < AType .
+	op untypedAtomic : String -> untypedAtomic [ctor] .
+	op ref : Qid -> Ref [ctor] .
+	op nilNode : -> NilNode [ctor] .
+endfm)
+
+(view SequenceItem from TRIV to XDM is
+	sort Elt to Item .
+endv)
+
+
+(fmod SEQUENCE is
+  protecting LIST{SequenceItem} .
+  sort NodeSequence .
+  subsort Item < NodeSequence < NeList{SequenceItem} .
+  --- subsort Item < NodeSequence < List{SequenceItem} .
+  op `[`] : -> NodeSequence [ctor] .
+  op __ : NodeSequence NodeSequence -> NodeSequence [ctor ditto] .
+  
+  var si : NodeSequence .
+  eq ([] si) = si .
+
+  --- op nil : -> List{SequenceItem} [ctor ditto] .
+endfm)
+
+
+(fmod XDM-NODE is
+	pr BOOL .
+	pr SEQUENCE .
+	pr STRING .
+	pr QID .
+	pr LIST{Qid} .
+	---pr LIST{AtomicType} .
+	---sort AtomicType .
+	--- pr ATOMIC-SEQUENCE .
+	sorts Uri QName .
+	
+	op uri : String -> Uri [ctor] .
+	op qname : Qid -> QName [ctor] .
+	
+***	5 Accessors
+
+***	A set of accessors is defined on nodes in the data model. For consistency, all the accessors are defined on every kind of node, although several accessors return a constant empty sequence on some kinds of nodes.
+
+***	In order for processors to be able to operate on instances of the data model, the model must expose the properties of the items it contains. The data model does this by defining a family of accessor functions. These are not functions in the literal sense; they are not available for users or applications to call directly. Rather they are descriptions of the information that an implementation of the data model must expose to applications. Functions and operators available to end-users are described in [XQuery 1.0 and XPath 2.0 Functions and Operators (Second Edition)].
+
+***	Some typed values in the data model are undefined. Attempting to access an undefined property is always an error. Behavior in these cases is implementation-defined and the host language is responsible for determining the result.
+***	5.1 attributes Accessor
+	op dm:attributes : Node -> NodeSequence .
+
+***	The dm:attributes accessor returns the attributes of a node as a sequence containing zero or more Attribute Nodes. The order of Attribute Nodes is stable but implementation dependent.
+
+***	It is defined on all seven node kinds.
+***	5.2 base-uri Accessor
+	op dm:base-uri : Node -> Uri .
+
+***The dm:base-uri accessor returns the base URI of a node as a sequence containing zero or one URI reference. For more information about base URIs, see [XML Base].
+
+***	It is defined on all seven node kinds.
+***	5.3 children Accessor
+	op dm:children : Node -> NodeSequence .
+
+***	The dm:children accessor returns the children of a node as a sequence containing zero or more nodes.
+
+***	It is defined on all seven node kinds.
+***	5.4 document-uri Accessor
+	op dm:document-uri : Node -> Uri .
+
+***	The dm:document-uri accessor returns the absolute URI of the resource from which the Document Node was constructed, if the absolute URI is available. If there is no URI available, or if it cannot be made absolute when the Document Node is constructed, or if it is used on a node other than a Document Node, the empty sequence is returned.
+
+***	It is defined on all seven node kinds.
+***	5.5 is-id Accessor
+	op dm:is-id : Node -> Bool .
+
+***	The dm:is-id accessor returns true if the node is an XML ID. Exactly what constitutes an ID depends in part on how the data model was constructed, see 6.2 Element Nodes and 6.3 Attribute Nodes.
+
+***	It is defined on all seven node kinds.
+***	5.6 is-idrefs Accessor
+	op dm:is-idrefs : Node -> Bool .
+
+***	The dm:is-idrefs accessor returns true if the node is an XML IDREF or IDREFS. Exactly what constitutes an IDREF or IDREFS depends in part on how the data model was constructed, see 6.2 Element Nodes and 6.3 Attribute Nodes.
+
+***	It is defined on all seven node kinds.
+***	5.7 namespace-bindings Accessor
+	op dm:namespace-bindings : Node -> List{Qid} .
+
+***	The dm:namespace-bindings accessor returns the dynamic, in-scope namespaces associated with a node as a set of prefix/URI pairs, using an implementation-dependent representation.
+
+***	The prefix for the default namespace is the zero length string.
+
+***	The dm:namespace-bindings accessor is defined on all seven node kinds.
+
+***	Note: this accessor and the namespace-nodes accessor provide two views of the same information.
+***	5.8 namespace-nodes Accessor
+	op dm:namespace-nodes : Node -> NodeSequence .
+
+***	The dm:namespace-nodes accessor returns the dynamic, in-scope namespaces associated with a node as a sequence containing zero or more Namespace Nodes. The order of Namespace Nodes is stable but implementation dependent.
+
+***	It is defined on all seven node kinds.
+
+***	Note: this accessor and the namespace-bindings accessor provide two views of the same information. Implementations that do not need to expose Namespace Nodes might choose not to implement this accessor.
+***	5.9 nilled Accessor
+	op dm:nilled : Node -> Bool .
+
+***	The dm:nilled accessor returns true if the node is "nilled". [Schema Part 1] introduced the nilled mechanism to signal that an element should be accepted as valid when it has no content even when it has a content type which does not require or even necessarily allow empty content.
+
+***	It is defined on all seven node kinds.
+***	5.10 node-kind Accessor
+	op dm:node-kind : Node -> String .
+
+***	The dm:node-kind accessor returns a string identifying the kind of node. It will be one of the following, depending on the kind of node: “attribute”, “comment”, “document”, “element”, “namespace” “processing-instruction”, or “text”.
+
+***	It is defined on all seven node kinds.
+***	5.11 node-name Accessor
+	op dm:node-name : Node -> QName .
+
+***	The dm:node-name accessor returns the name of the node as a sequence of zero or one xs:QNames. Note that the QName value includes an optional prefix as described in 3.3.3 QNames and NOTATIONS.
+
+***	It is defined on all seven node kinds.
+***	5.12 parent Accessor
+	op dm:parent : Node -> Node .
+
+***	The dm:parent accessor returns the parent of a node as a sequence containing zero or one nodes.
+
+***	It is defined on all seven node kinds.
+	--- 5.13 string-value Accessor
+	op dm:string-value : Node -> String .
+
+	--- The dm:string-value accessor returns the string value of a node.
+
+	--- It is defined on all seven node kinds.
+	--- 5.14 type-name Accessor
+	op dm:type-name : Node -> QName .
+
+	--- The dm:type-name accessor returns the name of the schema type of a node as a sequence of zero or one xs:QNames.
+
+	--- It is defined on all seven node kinds.
+	--- 5.15 typed-value Accessor
+	op dm:typed-value : Node -> NodeSequence .
+
+	--- The dm:typed-value accessor returns the typed-value of the node as a sequence of zero or more atomic values.
+
+	--- It is defined on all seven node kinds.
+	--- 5.16 unparsed-entity-public-id Accessor
+	op dm:unparsed-entity-public-id : Node -> Uri .
+
+
+	--- The dm:unparsed-entity-public-id accessor returns the public identifier of an unparsed external entity declared in the specified document. If no entity with the name specified in $entityname exists, or if the entity is not an external unparsed entity, or if the entity has no public identifier, the empty sequence is returned.
+
+	--- It is defined on all seven node kinds.
+	--- 5.17 unparsed-entity-system-id Accessor
+	op dm:unparsed-entity-system-id : Node  -> Uri .
+
+	--- The dm:unparsed-entity-system-id accessor returns the system identifier of an unparsed external entity declared in the specified document. The value is an absolute URI, and is obtained by resolving the [system identifier] of the unparsed entity information item against the [declaration base URI] of the same item. If no entity with the name specified in $entityname exists, or if the entity is not an external unparsed entity, the empty sequence is returned.
+
+	--- It is defined on all seven node kinds.
+
+endfm)

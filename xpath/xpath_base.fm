@@ -1,0 +1,38 @@
+
+(fmod XPATH-AXES-CONST is
+	sort AxisType .
+	op self : -> AxisType [ctor] .
+	op child : -> AxisType [ctor] .
+	op attribute : -> AxisType [ctor] .
+	op parent : -> AxisType [ctor] .
+endfm)
+
+(omod XPATH-BASE is
+	pr XDM-ALL .
+	pr DATABASE .
+	pr XPATH-AXES-CONST .
+	pr LOCK-TABLE-XQUF .
+	pr CONVERSION .
+	
+	sorts Expr XPathExpr StepExpr ForwardStep ReverseStep .
+	subsort XPathExpr < Expr .
+	subsort Node < XPathExpr .
+	subsort StepExpr < XPathExpr .
+	subsort ForwardStep ReverseStep < XPathExpr .
+	sort Axis .
+	
+	op doc : Uri -> StepExpr [ctor] .
+	op axis : AxisType Qid  -> StepExpr [ctor] .
+
+	op _/_ : XPathExpr StepExpr -> XPathExpr [ctor] . 
+	op _/_ : StepExpr StepExpr -> XPathExpr [ctor ditto] .
+
+	msg beginTrans : Oid Expr -> Msg .
+	msg `(_`,_`)`[`[_`]`] : Oid Nat Expr -> Msg .
+	
+	msg mnode : Oid Node Nat -> Msg .
+	msg maxis : Oid AxisType Node Qid Nat -> Msg .
+	msg mnodetest : Oid Qid Node Nat -> Msg . 
+	msg mdoc : Oid Uri Nat -> Msg .
+	msg lock : Oid LockMode Node Nat -> Msg .
+endom)

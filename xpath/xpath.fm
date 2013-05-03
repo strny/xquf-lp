@@ -1,0 +1,16 @@
+load ../database/database.fm
+load xpath_base.fm
+load xpath_relpath.fm
+load xpath_transaction.fm
+load xpath_doc.fm
+load xpath_node.fm
+load xpath_axis.fm
+
+(omod XPATH is
+	pr XPATH-BASE .
+	pr XPATH-RELPATH .
+	pr XPATH-TRANSACTION .
+	pr XPATH-DOC .
+	pr XPATH-NODE .
+	pr XPATH-AXIS .
+endom)

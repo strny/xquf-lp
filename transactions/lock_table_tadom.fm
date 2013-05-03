@@ -1,0 +1,321 @@
+load lock_table.fm
+*** load lock.maude
+***( 
+TaDOM 2+
+CO	PA	
+IR	IR	Intention read: At least one descendant of the context node has been read.
+NR	IR	Node read: The context node has been read.
+LR	IR	Level read: The context node and all its child nodes have been read.
+SR	IR	Subtree read: The context node and all its descendants have been read.
+IX	IX	Intention exclusive: At least one descendant node (but not a child node) of the context node has been modified.
+LRIX	IX	Level read intention exclusive: The context node and all its child nodes have been read and at least one descendant (but not a child node) of the context node has been modified.
+SRIX	IX	Subtree read intention exclusive: The context node and all its descendant nodes have been read and at least one descendant (but not a child node) of the context node has been modified.
+CX	IX	Child exclusive: At least on child node of the context node has been modified.
+LRCX	IX	Level read child exclusive: The context node and all its child nodes have been read and at least on child node of the context node has been modified.
+SRCX	IX	Subtree read child exclusive: The context node and all its descendant nodes have been read and at least on child node of the context node has been modified.
+SU	IR	Subtree update: The context node and all its descendant nodes have been read. Possible downgrade to SR or upgrade to SX.
+SX	CX	Subtree exclusive: The context node and all its descendants are locked for deletion.
+ 	-	IR	NR	LR	SR	IX	LRX	SRX	CX	LCX	SCX	SU	SX
+IR	+	+	+	+	+	+	+	+	+	+	+	-	-
+NR	+	+	+	+	+	+	+	+	+	+	+	-	-
+LR	+	+	+	+	+	+	+	+	-	-	-	-	-
+SR	+	+	+	+	+	-	-	-	-	-	-	-	-
+IX	+	+	+	+	-	+	+	-	+	+	-	-	-
+LRX	+	+	+	+	-	+	+	-	-	-	-	-	-
+SRX	+	+	+	+	-	-	-	-	-	-	-	-	-
+CX	+	+	+	-	-	+	-	-	+	-	-	-	-
+LCX	+	+	+	-	-	+	-	-	-	-	-	-	-
+SCX	+	+	+	-	-	-	-	-	-	-	-	-	-
+SU	+	+	+	+	+	-	-	-	-	-	-	-	-
+SX	+	-	-	-	-	-	-	-	-	-	-	-	-
+
+Conversion matrix
+ 	-	IR	NR	LR	SR	IX	LRX	SRX	CX	LCX	SCX	SU	SX
+IR	IR	IR	NR	LR	SR	IX	LRX	SRX	CX	LCX	SCX	SU	SX
+NR	NR	NR	NR	LR	SR	IX	LRX	SRX	CX	LCX	SCX	SU	SX
+LR	LR	LR	LR	LR	SR	LRX	LRX	SRX	LCX	LCX	SCX	SU	SX
+SR	SR	SR	SR	SR	SR	SRX	SRX	SRX	SCX	SCX	SCX	SR	SX
+IX	IX	IX	IX	LRX	SRX	IX	LRX	SRX	CX	LCX	SCX	SX	SX
+LRX	LRX	LRX	LRX	LRX	SRX	LRX	LRX	SRX	LCX	LCX	SCX	SX	SX
+SRX	SRX	SRX	SRX	SRX	SRX	SRX	SRX	SRX	SCX	SCX	SCX	SX	SX
+CX	CX	CX	CX	LCX	SCX	CX	LCX	SCX	CX	LCX	SCX	SX	SX
+LCX	LCX	LCX	LCX	LCX	SCX	LCX	LCX	SCX	LCX	LCX	SCX	SX	SX
+SCX	SCX	SCX	SCX	SCX	SCX	SCX	SCX	SCX	SCX	SCX	SCX	SX	SX
+SU	SU	SU	SU	SU	SU	SX	SX	SX	SX	SX	SX	SU	SX
+SX	SX	SX	SX	SX	SX	SX	SX	SX	SX	SX	SX	SX	SX
+
+http://wwwlgis.informatik.uni-kl.de/archiv/wwwdvs.informatik.uni-kl.de/agdbis/projects/xtc/report/taDOM2plus.html
+)
+
+
+(fmod LOCK-TABLE-TADOM is
+	pr LOCK-TABLE .
+	sorts IR NR LR SR IX LRIX SRIX CX LRCX SRCX SU SX .
+	subsorts IR NR LR SR IX LRIX SRIX CX LRCX SRCX SU SX < LockMode .
+		
+	op ir : -> IR [ctor] .
+	op nr : -> NR [ctor] .
+	op lr : -> LR [ctor] .
+	op sr : -> SR [ctor] .
+	op ix : -> IX [ctor] .
+	op lrix : -> LRIX [ctor] .
+	op srix : -> SRIX [ctor] .
+	op cx : -> CX [ctor] .
+	op lrcx : -> LRCX [ctor] .
+	op srcx : -> SRCX [ctor] .
+	op su : -> SU [ctor] .
+	op sx : -> SX [ctor] .
+	
+	var vir : IR . var vnr : NR . var vlr : LR . var vsr : SR .
+	var vix : IX . var vlrix : LRIX . var vsrix : SRIX . var vcx : CX .
+	var vlrcx : LRCX . var vsrcx : SRCX . var vsu : SU . var vsx : SX . var l1,l2 : LockMode .
+	
+	eq getParentLock(vir) = vir .
+	eq getParentLock(vnr) = ir .
+	eq getParentLock(vlr) = ir .
+	eq getParentLock(vsr) = ir .
+	eq getParentLock(vix) = ix .
+	eq getParentLock(vlrix) = ix .
+	eq getParentLock(vsrix) = ix .
+	eq getParentLock(vcx) = ix .
+	eq getParentLock(vlrcx) = ix .
+	eq getParentLock(vsrcx) = ix .
+	eq getParentLock(vsu) = ir .
+	eq getParentLock(vsx) = cx .
+	
+	
+	
+	eq convert(vsx,l1) = vsx .	
+
+	eq convert(vsu,vir) = vsu .
+	eq convert(vsu,vnr) = vsu .
+	eq convert(vsu,vlr) = vsu .
+	eq convert(vsu,vsr) = vsu .
+	eq convert(vsu,vsu) = vsu .
+	eq convert(vsu,l1) = sx .
+	
+
+	eq convert(vsrcx,vir) = vsrcx .
+	eq convert(vsrcx,vnr) = vsrcx .
+	eq convert(vsrcx,vlr) = vsrcx .
+	eq convert(vsrcx,vsr) = vsrcx .
+	eq convert(vsrcx,vix) = vsrcx .
+	eq convert(vsrcx,vlrix) = vsrcx .
+	eq convert(vsrcx,vsrix) = vsrcx .
+	eq convert(vsrcx,vcx) = vsrcx .
+	eq convert(vsrcx,vlrcx) = vsrcx .
+	eq convert(vsrcx,vsrcx) = vsrcx .
+	eq convert(vsrcx,vsu) = sx .
+	eq convert(vsrcx,vsx) = vsx .
+
+
+	eq convert(vlrcx,vir) = vlrcx .
+	eq convert(vlrcx,vnr) = vlrcx .
+	eq convert(vlrcx,vlr) = vlrcx .
+	eq convert(vlrcx,vsr) = srcx .
+	eq convert(vlrcx,vix) = vlrcx .
+	eq convert(vlrcx,vlrix) = vlrcx .
+	eq convert(vlrcx,vsrix) = srcx .
+	eq convert(vlrcx,vcx) = vlrcx .
+	eq convert(vlrcx,vlrcx) = vlrcx .
+	eq convert(vlrcx,vsrcx) = vsrcx .
+	eq convert(vlrcx,vsu) = sx .
+	eq convert(vlrcx,vsx) = vsx .
+
+
+	eq convert(vcx,vir) = vcx .
+	eq convert(vcx,vnr) = vcx .
+	eq convert(vcx,vlr) = lrcx .
+	eq convert(vcx,vsr) = srcx .
+	eq convert(vcx,vix) = vcx .
+	eq convert(vcx,vlrix) = lrcx .
+	eq convert(vcx,vsrix) = srcx .
+	eq convert(vcx,vcx) = vcx .
+	eq convert(vcx,vlrcx) = vlrcx .
+	eq convert(vcx,vsrcx) = vsrcx .
+	eq convert(vcx,vsu) = sx .
+	eq convert(vcx,vsx) = vsx .
+
+
+	eq convert(vsrix,vir) = vsrix .
+	eq convert(vsrix,vnr) = vsrix .
+	eq convert(vsrix,vlr) = vsrix .
+	eq convert(vsrix,vsr) = srix .
+	eq convert(vsrix,vix) = vsrix .
+	eq convert(vsrix,vlrix) = vsrix .
+	eq convert(vsrix,vsrix) = vsrix .
+	eq convert(vsrix,vcx) = srcx .
+	eq convert(vsrix,vlrcx) = srcx .
+	eq convert(vsrix,vsrcx) = vsrcx .
+	eq convert(vsrix,vsu) = sx .
+	eq convert(vsrix,vsx) = vsx .
+
+	eq convert(vlrix,vir) = vlrix .
+	eq convert(vlrix,vnr) = vlrix .
+	eq convert(vlrix,vlr) = vlrix .
+	eq convert(vlrix,vsr) = srix .
+	eq convert(vlrix,vix) = vlrix .
+	eq convert(vlrix,vlrix) = vlrix .
+	eq convert(vlrix,vsrix) = vsrix .
+	eq convert(vlrix,vcx) = lrcx .
+	eq convert(vlrix,vlrcx) = vlrcx .
+	eq convert(vlrix,vsrcx) = vsrcx .
+	eq convert(vlrix,vsu) = sx .
+	eq convert(vlrix,vsx) = vsx .
+
+
+
+	eq convert(vix,vir) = vix .
+	eq convert(vix,vnr) = vix .
+	eq convert(vix,vlr) = lrix .
+	eq convert(vix,vsr) = srix .
+	eq convert(vix,vix) = vix .
+	eq convert(vix,vlrix) = vlrix .
+	eq convert(vix,vsrix) = vsrix .
+	eq convert(vix,vcx) = vcx .
+	eq convert(vix,vlrcx) = vlrcx .
+	eq convert(vix,vsrcx) = vsrcx .
+	eq convert(vix,vsu) = sx .
+	eq convert(vix,vsx) = vsx .
+
+
+	eq convert(vsr,vir) = vsr .
+	eq convert(vsr,vnr) = vsr .
+	eq convert(vsr,vlr) = vsr .
+	eq convert(vsr,vsr) = vsr .
+	eq convert(vsr,vix) = srix .
+	eq convert(vsr,vlrix) = srix .
+	eq convert(vsr,vsrix) = vsrix .
+	eq convert(vsr,vcx) = srcx .
+	eq convert(vsr,vlrcx) = srcx .
+	eq convert(vsr,vsrcx) = vsrcx .
+	eq convert(vsr,vsu) = vsr .
+	eq convert(vsr,vsx) = vsx .
+
+
+	eq convert(vlr,vir) = vlr .
+	eq convert(vlr,vnr) = vlr .
+	eq convert(vlr,vlr) = vlr .
+	eq convert(vlr,vsr) = vsr .
+	eq convert(vlr,vix) = lrix .
+	eq convert(vlr,vlrix) = vlrix .
+	eq convert(vlr,vsrix) = vsrix .
+	eq convert(vlr,vcx) = lrcx .
+	eq convert(vlr,vlrcx) = vlrcx .
+	eq convert(vlr,vsrcx) = vsrcx .
+	eq convert(vlr,vsu) = vsu .
+	eq convert(vlr,vsx) = vsx .
+
+	eq convert(vnr,vir) = vnr .
+	eq convert(vnr,vnr) = vnr .
+	eq convert(vnr,vlr) = vlr .
+	eq convert(vnr,vsr) = vsr .
+	eq convert(vnr,vix) = vix .
+	eq convert(vnr,vlrix) = vlrix .
+	eq convert(vnr,vsrix) = vsrix .
+	eq convert(vnr,vcx) = vcx .
+	eq convert(vnr,vlrcx) = vlrcx .
+	eq convert(vnr,vsrcx) = vsrcx .
+	eq convert(vnr,vsu) = vsu .
+	eq convert(vnr,vsx) = vsx .
+
+	
+	eq convert(vir,vir) = vir .
+	eq convert(vir,vnr) = vnr .
+	eq convert(vir,vlr) = vlr .
+	eq convert(vir,vsr) = vsr .
+	eq convert(vir,vix) = vix .
+	eq convert(vir,vlrix) = vlrix .
+	eq convert(vir,vsrix) = vsrix .
+	eq convert(vir,vcx) = vcx .
+	eq convert(vir,vlrcx) = vlrcx .
+	eq convert(vir,vsrcx) = vsrcx .
+	eq convert(vir,vsu) = vsu .
+	eq convert(vir,vsx) = vsx .
+	
+	
+	
+	eq isCompatible(vir, vir) = true .
+	eq isCompatible(vir, vnr) = true .
+	eq isCompatible(vir, vlr) = true .
+	eq isCompatible(vir, vsr) = true .
+	eq isCompatible(vir, vix) = true .
+	eq isCompatible(vir, vlrix) = true .
+	eq isCompatible(vir, vsrix) = true .
+	eq isCompatible(vir, vcx) = true .
+	eq isCompatible(vir, vlrcx) = true .
+	eq isCompatible(vir, vsrcx) = true .
+	
+	
+	eq isCompatible(vnr, vir) = true .
+	eq isCompatible(vnr, vnr) = true .
+	eq isCompatible(vnr, vlr) = true .
+	eq isCompatible(vnr, vsr) = true .
+	eq isCompatible(vnr, vix) = true .
+	eq isCompatible(vnr, vlrix) = true .
+	eq isCompatible(vnr, vsrix) = true .
+	eq isCompatible(vnr, vcx) = true .
+	eq isCompatible(vnr, vlrcx) = true .
+	eq isCompatible(vnr, vsrcx) = true .
+	
+	
+	eq isCompatible(vlr, vir) = true .
+	eq isCompatible(vlr, vnr) = true .
+	eq isCompatible(vlr, vlr) = true .
+	eq isCompatible(vlr, vsr) = true .
+	eq isCompatible(vlr, vix) = true .
+	eq isCompatible(vlr, vlrix) = true .
+	eq isCompatible(vlr, vsrix) = true .
+	
+	
+	eq isCompatible(vsr, vir) = true .
+	eq isCompatible(vsr, vnr) = true .
+	eq isCompatible(vsr, vlr) = true .
+	eq isCompatible(vsr, vsr) = true .
+	
+	
+	eq isCompatible(vix, vir) = true .
+	eq isCompatible(vix, vnr) = true .
+	eq isCompatible(vix, vlr) = true .
+	eq isCompatible(vix, vix) = true .
+	eq isCompatible(vix, vlrix) = true .
+	eq isCompatible(vix, vcx) = true .
+	eq isCompatible(vix, vlrcx) = true .
+
+	
+	eq isCompatible(vlrix, vir) = true .
+	eq isCompatible(vlrix, vnr) = true .
+	eq isCompatible(vlrix, vlr) = true .
+	eq isCompatible(vlrix, vix) = true .
+	eq isCompatible(vlrix, vlrix) = true .
+
+
+	eq isCompatible(vsrix, vir) = true .
+	eq isCompatible(vsrix, vnr) = true .
+	eq isCompatible(vsrix, vlr) = true .
+
+	eq isCompatible(vcx, vir) = true .
+	eq isCompatible(vcx, vnr) = true .
+	eq isCompatible(vcx, vix) = true .
+	eq isCompatible(vcx, vcx) = true .
+
+	eq isCompatible(vlrcx, vir) = true .
+	eq isCompatible(vlrcx, vnr) = true .
+	eq isCompatible(vlrcx, vix) = true .
+	
+	
+	eq isCompatible(vsrcx, vir) = true .
+	eq isCompatible(vsrcx, vnr) = true .
+
+	eq isCompatible(vsu, vir) = true .
+	eq isCompatible(vsu, vnr) = true .
+	eq isCompatible(vsu, vlr) = true .
+	eq isCompatible(vsu, vsr) = true .
+
+	eq isCompatible(l1, empty) = true .
+
+	eq isCompatible(l1, l2) = false .
+	
+endfm)
+	
+	

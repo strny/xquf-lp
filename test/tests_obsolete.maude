@@ -1,0 +1,58 @@
+*** load "../node.made"
+load "../document.maude"
+
+*** red addLock(addLock(node('a,lock,nilnode),lock),lock) == node('a,(lock lock lock),nilnode) .
+red getChildren(node('a, lock, node('a, lock, nilnode))) == node('a, lock, nilnode) .
+red getChildren(node('a, lock, nilnode)) == nilnode .
+red getChildren(node('aaa,lock,(node('a,lock,nilnode) node('b,lock,nilnode)))) == (node('a,lock,nilnode) node('b,lock,nilnode)) .
+red getID(node('aaa, empty, nilnode)) == 'aaa .
+red getParent(node('bb, empty, nilnode), node('aa, lock, node('bb, empty, nilnode))) == node('aa, lock, node('bb, empty, nilnode)) .
+red getParent(node('cc, empty, nilnode), node('aa, lock, node('bb, empty, nilnode))) == nilnode .
+
+
+red getID(doc('aaa, node('a, empty, nilnode))) == 'aaa .
+red getRoot(doc('aaa, node('a, empty, nilnode))) == node('a, empty, nilnode) .
+red getParent(node('bb, empty, nilnode), doc('xyz, node('aa, lock, node('bb, empty, nilnode)))) == node('aa, lock, node('bb, empty, nilnode)) .
+
+red contains(node('bb, empty, nilnode), node('aa, lock, node('xb, empty, nilnode) node('bb, empty, nilnode))) == true .
+red contains(node('bb, empty, nilnode), node('bb, empty, nilnode)) == true .
+red contains(node('bb, empty, nilnode), nilnode) == false .
+red contains(node('c, empty, nilnode), node('aa, lock, node('bb, empty, node('c, empty, nilnode)))) == true .
+
+red findNode('bb, node('aa, lock, node('bb, empty, nilnode))) == node('bb, empty, nilnode) .
+red findNode('x, node('aa, lock, node('bb, empty, nilnode))) == nilnode .
+
+
+
+load "../lock_table.maude"
+
+red isCompatible(ir,nr) .
+red isCompatible(sx,nr) == false .
+red isCompatible(sx,empty) .
+
+red convert(nr, ix) == ix .
+red convert(lr, cx) == lrcx .
+
+load "../lock_operations.maude"
+
+red getLocksForTransaction(transaction('t1), node('aaa, lock(transaction('t1), ir),nilnode)) == lock(transaction('t1), ir) .
+red getLocksForTransaction(transaction('t1), node('aaa, lock(transaction('t2), ir),nilnode)) == empty .
+red getLocksForTransaction(transaction('t1), node('aaa, empty, nilnode)) == empty .
+
+
+red setLock(transaction('t1), ir, 'aaa, node('aaa, empty, nilnode)) == node('aaa, lock(transaction('t1), ir), nilnode) .
+red setLock(transaction('t1), ir, 'aaa, node('bbb, empty, (node('aaa, empty, nilnode) node('ccc, empty, nilnode)))) == node('bbb, lock(transaction('t1), ir), node('aaa, lock(transaction('t1), ir), nilnode)) .
+red setLock(transaction('t1), nr, 'aaa, node('bbb, empty, node('aaa, empty, nilnode))) == node('bbb, lock(transaction('t1), ir), node('aaa, lock(transaction('t1), nr), nilnode)) .
+
+*** Vyresit chybove stavy -> neco se nepovedlo zamknout? Asi budovat DAG cekajicich transakci, spolecne se zamykacimi operacemi
+*** Zatim reseni ve smyslu, ze to nejde dal zredukovat
+red setLock(transaction('t1), sx, 'aaa, node('bbb, lock(transaction('t2),sx), node('aaa, lock(transaction('t2),sx), nilnode))) == setLock(transaction('t1), sx, 'aaa, node('bbb, lock(transaction('t2),sx), node('aaa, lock(transaction('t2),sx), nilnode))) .
+
+*** red setLock(transaction('t1), sr, 'aaa, node('bbb, empty, (node('aaa, lock(transaction('t1),ir) , nilnode) node('ccc, empty, nilnode)))) == node('bbb, empty, node('aaa, lock(transaction('t1), sr), nilnode) .
+red setLock(transaction('t1), lrix, 'aaa, node('bbb, lock(transaction('t1),ir), node('aaa, lock(transaction('t1),nr), nilnode))) == node('bbb, lock(transaction('t1), ix), node('aaa, lock(transaction('t1), lrix), nilnode)) .
+
+
+
+load "../dom_op.maude"
+
+red getFirstChild(node('aaa, lock, (node('bbb,lock,nilnode))),transaction('t1)) == node('bbb,lock,nilnode) .

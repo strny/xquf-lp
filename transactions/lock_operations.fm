@@ -1,0 +1,89 @@
+load transaction.fm
+load lock_table_xquf.fm
+load lock.fm
+
+
+***(
+TaDOM 2+
+CO	PA	
+IR	IR	Intention read: At least one descendant of the context node has been read.
+NR	IR	Node read: The context node has been read.
+LR	IR	Level read: The context node and all its child nodes have been read.
+SR	IR	Subtree read: The context node and all its descendants have been read.
+IX	IX	Intention exclusive: At least one descendant node (but not a child node) of the context node has been modified.
+LRIX	IX	Level read intention exclusive: The context node and all its child nodes have been read and at least one descendant (but not a child node) of the context node has been modified.
+SRIX	IX	Subtree read intention exclusive: The context node and all its descendant nodes have been read and at least one descendant (but not a child node) of the context node has been modified.
+CX	IX	Child exclusive: At least on child node of the context node has been modified.
+LRCX	IX	Level read child exclusive: The context node and all its child nodes have been read and at least on child node of the context node has been modified.
+SRCX	IX	Subtree read child exclusive: The context node and all its descendant nodes have been read and at least on child node of the context node has been modified.
+SU	IR	Subtree update: The context node and all its descendant nodes have been read. Possible downgrade to SR or upgrade to SX.
+SX	CX	Subtree exclusive: The context node and all its descendants are locked for deletion.
+)
+*** TODO DORESIT setLock!!!!
+(fmod LOCK-OPERATIONS is
+	pr TRANSACTION .
+	pr LOCK .
+	pr LOCK-TABLE-XQUF .
+	pr SET{Lock} .
+	
+	op getLocksForTransaction : Transaction Set{Lock} -> Set{Lock} .
+	op compatible : Transaction Lock Set{Lock} -> Bool .
+	op addAndConvert : Set{Lock} Lock -> Set{Lock} .
+	--- op getLockMode : Lock -> LockMode .
+
+    var l1,l2 : LockMode .
+	var t1 : Transaction . var t2 : Transaction .
+	var n1 : Node . var n2 : Node .
+	var L : Lock .
+	var LI : Set{Lock} . vars LN LN2 : NodeSequence .
+	vars ID ID2 : Qid . var N : Node . var M : Node . var NN : NilNode .
+
+
+	
+	eq getLocksForTransaction(t1, (LI, lock(n1, l1, t1))) = lock(n1, l1, t1), getLocksForTransaction(t1, LI) .
+	eq getLocksForTransaction(t1, (LI, lock(n1, l1, t2))) = getLocksForTransaction(t1, LI) .
+	eq getLocksForTransaction(t1, empty) = empty .
+	
+	eq compatible(t1, L, LI) = true .
+	
+	eq addAndConvert((LI, lock(n1, l2, t1)), lock(n1, l1, t1)) = union(LI, lock(n1, convert(l1,l2), t1)) . 
+	eq addAndConvert(LI, lock(n1, l1, t1)) = union(LI, lock(n1, l1, t1)) [owise] . 
+	
+	
+	
+---	ceq setLock(n1, L, t1, LI) = union(convert(L, getLocksForTransaction(t1, LI \ getLocksForTransacion(t1, node(ID, LI, LN2))), LN2) if getLocksForTransaction(t1, node(ID, LI, LN2)) =/= empty.
+	
+	
+---	eq getLockMode(empty) = empty .
+---	eq getLockMode(lock(t1, l1)) = l1 .
+***	ceq setLock(t1, L, ID, node(ID, LI, LN2)) = node(ID, union(convert(L, getLocksForTransaction(t1, node(ID, LI, LN2), LI \ getLocksForTransacion(t1, node(ID, LI, LN2))), LN2) if getLocksForTransaction(t1, node(ID, LI, LN2)) =/= empty.
+
+*** konverze pokud jiz dana transakce ma neco zamceneho
+***(
+	ceq setLock(t1, l1, ID, node(ID, LI, LN2)) = node(ID, union(lock(t1, convert(l1, getLockMode(getLocksForTransaction(t1, node(ID, LI, LN2))))), LI \ getLocksForTransaction(t1, node(ID, LI, LN2))), LN2) 
+		if getLocksForTransaction(t1, node(ID, LI, LN2)) =/= empty .
+
+	ceq setLock(t1, l1, ID, node(ID, LI, LN) LN2) = node(ID, union(lock(t1, convert(l1, getLockMode(getLocksForTransaction(t1, node(ID, LI, LN))))), LI \ getLocksForTransaction(t1, node(ID, LI, LN))), LN) 
+		if getLocksForTransaction(t1, node(ID, LI, LN2)) =/= empty .
+
+	
+*** induktivni krok	
+	ceq setLock(t1, l1, ID, node(ID2, LI, LN2)) = node(ID2, union(lock(t1,convert(getParentLock(l1), getLockMode(getLocksForTransaction(t1, node(ID, LI, LN2))))), LI \ getLocksForTransaction(t1, node(ID2, LI, LN2))), setLock(t1, l1, ID, LN2)) 
+				if getLocksForTransaction(t1, node(ID2, LI, LN2)) =/= empty .
+	
+
+
+*** kompatibilita pokud ma jina transakce jiz neco zamceneho	
+	ceq setLock(t1, l1, ID, node(ID, LI, LN2)) = node(ID, union(lock(t1,l1), LI), LN2) 
+		if isCompatible(l1, getLockMode(LI \ getLocksForTransaction(t1, node(ID, LI, LN2)))) .
+	
+	ceq setLock(t1, l1, ID, node(ID, LI, LN) LN2) = node(ID, union(lock(t1,l1), LI), LN) 
+		if isCompatible(l1, getLockMode(LI \ getLocksForTransaction(t1, node(ID, LI, LN)))) .
+
+*** induktivni krok		
+	ceq setLock(t1, l1, ID, node(ID2, LI, LN2)) = node(ID2, union(lock(t1,getParentLock(l1)), LI \ getLocksForTransaction(t1, node(ID2, LI, LN2))), setLock(t1, l1, ID, LN2)) 
+		if isCompatible(getParentLock(l1),getLockMode(LI \ getLocksForTransaction(t1, node(ID2, LI, LN2)))) .
+	
+	eq setLock(t1, l1, ID, node(ID2, LI, LN) LN2) = setLock(t1, l1, ID, LN2) .
+)
+endfm)

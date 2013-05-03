@@ -1,0 +1,38 @@
+load ../xdm/xdm.fm
+load colored_result.fm
+--- Document tests
+(fmod TEST-XDM is
+	pr XDM-ALL .
+	pr COLORING .
+endfm)
+	
+
+
+(red test(dm:node-kind(document('1, uri("test.xml"), element('1.1, 'books, ref('1), element('1.1.1,'book,ref('1.1),[],[]),[]))) == "document") .)
+(red test(dm:attributes(document('1,uri("test.xml"), nilElement)) == []) .)
+(red test(dm:children(document('1,uri("test.xml"), nilElement)) == nilElement) .)
+(red test(dm:children(document('1,uri("test.xml"), element('1.1, 'books, ref('1), element('1.1.1,'book,ref('1.1),[],[]),[]))) == element('1.1, 'books, ref('1), element('1.1.1,'book,ref('1.1),[],[]),[])) . )
+(red test(dm:document-uri(document('1, uri("test.xml"), nilElement)) == uri("test.xml")) .)
+(red test(dm:is-id(document('1,uri("test.xml"), nilElement)) == false) .)
+
+--- Element tests
+(red test(dm:attributes(element('1,'books,ref('1), element('1.1,'book,ref('1), [],[]),attribute('a1,ref('1.1),"HODHOD") attribute('a2,ref('1.1),"HODHOD"))) == attribute('a1,ref('1.1),"HODHOD") attribute('a2,ref('1.1),"HODHOD")) .)
+(red test(dm:children(element('1,'books,ref('1), element('1.1,'book,ref('1), [],[]),attribute('a1,ref('1.1),"HODHOD") attribute('a2,ref('1.1),"HODHOD"))) == element('1.1,'book,ref('1), [],[])) . )
+(red test(dm:node-kind(element('1,'books,ref('1), element('1.1,'book,ref('1), [],[]),[])) == "element") .)
+(red test(dm:node-name(element('1,'books,ref('1), element('1.1,'book,ref('1), [],[]),[])) == qname('books)) .)
+(red test(dm:parent(element('1,'books,ref('1), element('1.1,'book,ref('1), [],[]),[])) == ref('1)) .)
+
+--- Attribute tests
+(red test(dm:base-uri(attribute('aaa,ref('1),"val")) == dm:base-uri(ref('1))) .)
+--- red dm:base-uri(attribute('aaa,element('books,[],[]),"val")) == uri("") .
+(red test(dm:node-kind(attribute('aaa,ref('1),"val")) == "attribute") .)
+(red test(dm:type-name(attribute('aaa,ref('1),"val")) == qname('aaa)) .)
+(red test(dm:string-value(attribute('aaa,ref('1),"val")) == "val") .)
+(red test(dm:parent(attribute('aaa,ref('1),"val")) == ref('1)) .)
+
+--- Node tests
+(red test(dm:node-kind(text("aaaa",ref('1))) == "text") .)
+(red test(dm:string-value(text("aaaa",ref('1))) == "aaaa") .)
+
+
+

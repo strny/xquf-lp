@@ -1,0 +1,43 @@
+load xpath_base.fm
+
+
+(omod XPATH-RELPATH is
+pr XPATH-BASE .
+
+var tid seqn num : Nat .	 
+var se1 se2 : StepExpr . 
+var xp : XPathExpr . 
+var stackid : Oid .
+var n : Int .
+var nid : Oid .
+
+***(		
+--- RelPath Rule
+)
+
+rl [relpath-rule-se] :
+	(tid, num)[[ (se1 / se2) ]]
+   < tid : LState | seq : seqn, stack : stackid >
+   < stackid : Stack{Nat} | first : o(stackid, n) >
+   < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+   => 
+    < tid : LState | seq : seqn + 2 >
+	< stackid : Stack{Nat} | first : o(stackid, n + 2) >
+	< o(stackid, n + 2) : Node{Nat} | contents : seqn, next : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn + 1, next : nid >
+	(tid, seqn)[[ se1 ]] (tid, seqn + 1)[[ se2 ]].	
+
+rl [relpath-rule-xp] :
+	(tid, num)[[ (xp / se1) ]]
+   < tid : LState | seq : seqn, stack : stackid >
+   < stackid : Stack{Nat} | first : o(stackid, n) >
+   < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+   => 
+    < tid : LState | seq : seqn + 2 >
+	< stackid : Stack{Nat} | first : o(stackid, n + 2) >
+	< o(stackid, n + 2) : Node{Nat} | contents : seqn, next : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn + 1, next : nid >
+	(tid, seqn)[[ xp ]] (tid, seqn + 1)[[ se1 ]]
+.
+
+endom)

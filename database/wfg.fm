@@ -1,0 +1,29 @@
+---load ../xdm/xdm.maude
+load ../transactions/lock.fm
+
+
+(fmod WFG-EDGE is 
+	pr TRANSACTION .
+	sorts Edge .
+	op edge : Transaction Transaction -> Edge [ctor] .
+endfm)
+
+(view Edge from TRIV to WFG-EDGE is
+	sort Elt to Edge .
+endv)
+
+
+(fmod WFG is
+	pr SET{Edge} .
+	
+	sort WFG .
+	op empty-wfg : -> WFG [ctor] .
+	op wfg : Set{Edge} -> WFG .
+	op addEdge : WFG Transaction Transaction -> WFG .
+	
+	vars t1 t2 : Transaction .
+	var se : Set{Edge} .
+	
+	eq addEdge(wfg(se), t1, t2) = wfg(union(se, edge(t1,t2))) .  
+	
+endfm)

@@ -1,0 +1,66 @@
+  ---- from the book All About Maude
+  ---- from the Maude Manual
+  ---- by the Maude team
+  
+(omod ACCOUNT is
+    protecting QID .
+    protecting INT .
+	--- pr LIST{Msg} . 
+---	pr CONFIGURATION .
+
+    subsort Qid < Oid .
+    class Account | bal : Int .
+    msgs credit debit : Oid Int -> Msg .
+    msg from_to_transfer_ : Oid Oid Int -> Msg .
+	op genermsg : -> Msg .
+
+	vars A B : Oid .
+    var  M : Nat .
+    vars N N' : Int .
+	var C : Configuration .
+	sort Test .
+	sort GetInt .
+	op test : Nat -> Test .
+	op getInt : -> GetInt .
+	op _|=_ : Configuration Test -> Bool .
+	op _|=_ : Configuration GetInt -> Int .
+	
+	eq < A : Account | bal : N > C |= test(N) = true .
+	eq < A : Account | bal : N > |= getInt = N .
+	
+	
+---	eq < A : Account | bal : N > C |= test(N') = false [owise] .
+	eq genermsg = credit('A-06238, 1000) credit('A-06238, 1000) credit('A-06238, 5000) .
+	
+    rl [credit] :
+      credit(A, M)
+      < A : Account | bal : N >
+      => < A : Account | bal : N + M > .
+
+    crl [debit] :
+      debit(A, M)
+      < A : Account | bal : N >
+      => < A : Account | bal : N - M >
+      if N >= M .
+
+    crl [transfer] :
+      (from A to B transfer M)
+      < A : Account | bal : N >
+      < B : Account | bal : N' >
+      => < A : Account | bal : N - M >
+         < B : Account | bal : N' + M >
+      if N >= M .
+  endom)
+  
+(rew < 'A-06238 : Account | bal : 2000 >
+              debit('A-06238, 1000) |= getInt .)
+
+(rew < 'A-06238 : Account | bal : 2000 >
+			 genermsg .)
+---(
+rewrites: 878 in 10ms cpu (10ms real) (87800 rewrites/second)
+rewrite in ACCOUNT :
+  < 'A-06238 : Account | bal : 2000 > debit('A-06238,1000)
+result Object :
+  < 'A-06238 : Account | bal : 1000 >
+---)

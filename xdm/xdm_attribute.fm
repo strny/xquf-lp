@@ -1,0 +1,95 @@
+load xdm_node.fm
+load xdm_element.fm
+
+(fmod XDM-ATTRIBUTE is
+	pr XDM-NODE .
+
+--- 6.3 Attribute Nodes
+--- 6.3.1 Overview
+--- 
+--- Attribute Nodes represent XML attributes. Attributes have the following properties:
+--- 
+---     node-name
+--- 
+---     parent, possibly empty
+--- 
+---     type-name
+--- 
+---     string-value
+--- 
+---     typed-value
+--- 
+---     is-id
+--- 
+---     is-idrefs
+--- 
+	--- node-name, parent, string-value
+	op attribute : Qid Ref String -> Attribute [ctor] .
+--- Attribute Nodes must satisfy the following constraints.
+--- 
+---     If an Attribute Node A is among the attributes of an element E, then the parent of A must be E.
+--- 
+---     If a Attribute Node A has a parent element E, then A must be among the attributes of E.
+--- 
+---     The data model permits Attribute Nodes without parents (to represent partial results during expression processing, for example). Such attributes must not appear among the attributes of any Element Node.
+--- 
+---     In the node-name of an attribute node, if a namespace URI is present then a prefix must also be present.
+--- 
+--- For convenience, the Element Node that owns this attribute is called its "parent" even though an Attribute Node is not a "child" of its parent element.
+--- 6.3.2 Accessors
+var a : Attribute .
+var name : Qid .
+var par : Ref .
+var val : String .
+eq dm:attributes(a) = [] .
+---    Returns the empty sequence.
+
+---ceq dm:base-uri(attribute(name,par,val)) = dm:base-uri(par) if par =/= nilElement .
+eq dm:base-uri(attribute(name,par,val)) = dm:base-uri(par) .
+---ceq dm:base-uri(attribute(name,par,val)) = [] if par == nilElement .
+
+
+    --- If the attribute has a parent, returns the value of the dm:base-uri of its parent; otherwise it returns the empty sequence.
+
+eq dm:children(a) = [] .
+    --- Returns the empty sequence.
+
+eq dm:document-uri(a) = uri("") .
+    --- Returns the empty sequence.
+
+eq dm:is-id(a) = false .
+    --- Returns the value of the is-id property.
+
+eq dm:is-idrefs(a) = false .
+    --- Returns the value of the is-idrefs property.
+
+eq dm:namespace-bindings(a) = ' .
+    --- Returns the empty sequence.
+
+eq dm:namespace-nodes(a) = [] .
+    --- Returns the empty sequence.
+
+eq dm:nilled(a) = false .
+    --- Returns the empty sequence.
+
+eq dm:node-kind(a) = "attribute" .
+   ----    Returns “attribute”.
+eq dm:node-name(attribute(name,par,val)) = qname(name) .
+    --- Returns the value of the node-name property.
+
+eq dm:parent(attribute(name,par,val)) = par .
+    --- Returns the value of the parent property.
+
+eq dm:string-value(attribute(name,par,val)) = val .
+    --- Returns the value of the string-value property.
+
+eq dm:type-name(attribute(name,par,val)) = qname(name) .
+    --- Returns the value of the type-name property.
+
+eq dm:typed-value(a) = [] .
+    --- Returns the value of the typed-value property.
+eq dm:unparsed-entity-public-id(a) = uri("") .
+    --- Returns the empty sequence.
+eq dm:unparsed-entity-system-id(a) = uri("") .
+    --- Returns the empty sequence.
+endfm)

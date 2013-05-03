@@ -1,0 +1,98 @@
+load xdm_node.fm
+
+(fmod XDM-DOCUMENT is
+	pr XDM-NODE .
+	pr STRING .
+	--- pr LIST{Qid} .
+	--- 6.1.1 Overview
+
+	--- Document Nodes encapsulate XML documents. Documents have the following properties:
+
+	    --- base-uri, possibly empty.
+
+	    --- children, possibly empty.
+
+	    --- unparsed-entities, possibly empty.
+
+	    --- document-uri, possibly empty.
+
+	    --- string-value
+
+	    --- typed-value
+	--- constructor, Node is a root element. id, uri, children
+	op document : Qid Uri Node -> Document [ctor] .
+	
+	--- Document Nodes must satisfy the following constraints.
+
+	    --- The children must consist exclusively of Element, Processing Instruction, Comment, and Text Nodes if it is not empty. Attribute, Namespace, and Document Nodes can never appear as children
+
+	    --- If a node N is among the children of a Document Node D, then the parent of N must be D.
+
+	    --- If a node N has a parent Document Node D, then N must be among the children of D.
+
+	    --- The string-value property of a Document Node must be the concatenation of the string-values of all its Text Node descendants in document order or, if the document has no such descendants, the zero-length string.
+
+	--- In the [Infoset], a document information item must have at least one child, its children must consist exclusively of element information items, processing instruction information items and comment information items, and exactly one of the children must be an element information item. This data model is more permissive: a Document Node may be empty, it may have more than one Element Node as a child, and it also permits Text Nodes as children.
+
+	--- Implementations that support DTD processing and access to the unparsed entity accessors use the unparsed-entities property to associate information about an unordered collection of unparsed entities with a Document Node. This property is accessed indirectly through the dm:unparsed-entity-system-id and dm:unparsed-entity-public-id functions.
+	--- 6.1.2 Accessors
+	var did : Qid .
+	var d : Document .
+	
+
+	eq dm:attributes(d) = [] .
+	    --- Returns the empty sequence
+	
+	eq dm:base-uri(d) = uri("") .
+	    --- Returns the value of the base-uri property.
+	
+	var n : Node . 
+	var ur : Uri .
+	
+	eq dm:children(document(did, ur, n)) = n .
+	
+	    --- Returns the value of the children property.
+	
+	eq dm:document-uri(document(did, ur, n)) = ur .
+	    --- Returns the absolute URI of the resource from which the Document Node was constructed, or the empty sequence if no such absolute URI is available.
+	
+	eq dm:is-id(d) = false .
+	    --- Returns the empty sequence.
+	
+	eq dm:is-idrefs(d) = false .
+	    --- Returns the empty sequence.
+
+	eq dm:namespace-bindings(d) = ' .
+	    --- Returns the empty sequence
+	
+	eq dm:namespace-nodes(d) = [] .
+	    --- Returns the empty sequence
+	
+	eq dm:nilled(d) = false .
+	    --- Returns the empty sequence
+	
+	eq dm:node-kind(d) = "document" .
+---	    Returns “document”.
+	
+	eq dm:node-name(d) = qname(') .
+	    --- Returns the empty sequence.
+
+	eq dm:parent(d) = [] .
+	    --- Returns the empty sequence
+
+	eq dm:string-value(d) = "" .
+	    --- Returns the value of the string-value property.
+	
+	eq dm:type-name(d) = qname(') .
+	    --- Returns the empty sequence.
+	
+	eq dm:typed-value(d) = [] .
+	    --- Returns the value of the typed-value property.
+
+	eq dm:unparsed-entity-public-id(document(did, ur, n)) = ur . 
+	    --- Returns the public identifier of the specified unparsed entity or the empty sequence if no such entity exists.
+	
+	eq dm:unparsed-entity-system-id(document(did, ur, n)) = ur . 
+
+	    --- Returns the system identifier of the specified unparsed entity or the empty sequence if no such entity exists.	) 
+endfm)

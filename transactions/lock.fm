@@ -1,0 +1,16 @@
+load transaction.fm
+load ../xdm/xdm.fm
+load lock_table_xquf.fm
+
+(fmod LOCK is
+	pr XDM-ALL .
+	pr TRANSACTION .
+	pr LOCK-MODE .
+	sort Lock .
+	op lock : Node LockMode Transaction -> Lock [ctor] .
+---	op lock : NodeSequence LockMode Transaction -> Set{Lock} .
+endfm)
+
+(view Lock from TRIV to LOCK is 
+	sort Elt to Lock . 
+endv)

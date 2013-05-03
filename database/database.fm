@@ -1,0 +1,35 @@
+--- load ../xpath/xpath.fm
+load ../transactions/lock.fm
+load ../xdm/xdm.fm
+load oo_stack.fm
+load wfg.fm
+
+(omod DATABASE is
+	pr XDM-ALL .
+---	pr XPATH .
+	pr LOCK .
+	pr TRANSACTION .
+---	pr RANDOM .
+	pr QID .
+	pr NAT .
+	pr LIST{Qid} .
+	pr SET{Lock} .
+	pr SET{Transaction} .
+	pr OO-STACK{Nat} .
+	pr WFG .
+	
+	subsort Qid < Oid .
+	subsort Nat < Oid .
+	
+	sort Database .
+	sort Expr .
+	
+	op database : Document -> Database [ctor] .
+		
+	class GState | database : Database, locks : Set{Lock}, txs : Set{Transaction}, wfg : WFG, lastid : Nat .
+	class LState | tx : Transaction, res : NodeSequence, gs : Oid, seq : Nat, stack : Oid .
+	
+endom)
+***(
+(search init-state =>! C:Configuration < 'a : GState | nums:('1 '2 '2 '4 '5 '7 '7) > .)
+)

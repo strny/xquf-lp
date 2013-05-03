@@ -1,0 +1,136 @@
+load xdm_node.fm
+
+(fmod XDM-ELEMENT is
+	pr XDM-NODE .
+	
+	--- 6.2 Element Nodes
+	--- 6.2.1 Overview
+	--- 
+	--- Element Nodes encapsulate XML elements. Elements have the following properties:
+	--- 
+	---     base-uri, possibly empty.
+	--- 
+	---     node-name
+	--- 
+	---     parent, possibly empty
+	--- 
+	---     type-name
+	--- 
+	---     children, possibly empty
+	--- 
+	---     attributes, possibly empty
+	--- 
+	---     namespaces
+	--- 
+	---     nilled
+	--- 
+	---     string-value
+	--- 
+	---     typed-value
+	--- 
+	---     is-id
+	--- 
+	---     is-idrefs
+	
+	--- Id, Name,Parent, Children, Attributes
+	op element : Qid Qid Ref NodeSequence NodeSequence -> Element [ctor] .
+	--- op element : Qid Node -> Element [ctor] .
+	
+	op nilElement : -> Element [ctor] .
+	--- 
+	--- Element Nodes must satisfy the following constraints.
+	--- 
+	---     The children must consist exclusively of Element, Processing Instruction, Comment, and Text Nodes if it is not empty. Attribute, Namespace, and Document Nodes can never appear as children
+	--- 
+	---     The Attribute Nodes of an element must have distinct xs:QNames.
+	--- 
+	---     If a node N is among the children of an element E, then the parent of N must be E.
+	--- 
+	---     Exclusive of Attribute and Namespace Nodes, if a node N has a parent element E, then N must be among the children of E. (Attribute and Namespace Nodes have a parent, but they do not appear among the children of their parent.)
+	--- 
+	---     The data model permits Element Nodes without parents (to represent partial results during expression processing, for example). Such Element Nodes must not appear among the children of any other node.
+	--- 
+	---     If an Attribute Node A is among the attributes of an element E, then the parent of A must be E.
+	--- 
+	---     If an Attribute Node A has a parent element E, then A must be among the attributes of E.
+	--- 
+	---     The data model permits Attribute Nodes without parents. Such Attribute Nodes must not appear among the attributes of any Element Node.
+	--- 
+	---     If a Namespace Node N is among the namespaces of an element E, then the parent of N must be E.
+	--- 
+	---     If a Namespace Node N has a parent element E, then N must be among the namespaces of E.
+	--- 
+	---     The data model permits Namespace Nodes without parents. Such Namespace Nodes must not appear among the namespaces of any Element Node. This constraint is irrelevant for implementations that do not support Namespace Nodes.
+	--- 
+	---     If the dm:type-name of an Element Node is xs:untyped, then the dm:type-name of all its descendant elements must also be xs:untyped and the dm:type-name of all its Attribute Nodes must be xs:untypedAtomic.
+	--- 
+	---     If the dm:type-name of an Element Node is xs:untyped, then the nilled property must be false.
+	--- 
+	---     If the nilled property is true, then the children property must not contain Element Nodes or Text Nodes.
+	--- 
+	---     For every expanded QName that appears in the dm:node-name of the element, the dm:node-name of any Attribute Node among the attributes of the element, or in any value of type xs:QName or xs:NOTATION (or any type derived from those types) that appears in the typed-value of the element or the typed-value of any of its attributes, if the expanded QName has a non-empty URI, then there must be a prefix binding for this URI among the namespaces of this Element Node.
+	--- 
+	---     If any of the expanded QNames has an empty URI, then there must not be any binding among the namespaces of this Element Node which binds the empty prefix to a URI.
+	--- 
+	---     Every element must include a Namespace Node and/or namespace binding for the prefix xml bound to the URI http://www.w3.org/XML/1998/namespace and there must be no other prefix bound to that URI.
+	--- 
+	---     The string-value property of an Element Node must be the concatenation of the string-values of all its Text Node descendants in document order or, if the element has no such descendants, the zero-length string.
+	--- 
+	--- 6.2.2 Accessors
+	--- 
+	
+	var eid : Qid .
+	var name : Qid .
+	var parent : Ref . 
+	var children : NodeSequence .
+	var attributes : NodeSequence .
+	var e : Element .	
+	
+	eq dm:attributes(element(eid, name, parent, children, attributes)) = attributes .
+	    --- Returns the value of the attributes property. The order of Attribute Nodes is stable but implementation dependent.
+
+	eq dm:base-uri(e) = uri("") .
+	    --- Returns the value of the base-uri property.
+
+	eq dm:children(element(eid, name, parent, children, attributes)) = children . 
+	    --- Returns the value of the children property.
+
+	eq dm:document-uri(e) = uri("") .
+	    --- Returns the empty sequence.
+
+	eq dm:is-id(e) = false .
+	    --- Returns the value of the is-id property.
+	eq dm:is-idrefs(e) = false .
+	    --- Returns the value of the is-idrefs property.
+	
+	eq dm:namespace-bindings(e) = ' .
+	    --- Returns the value of the namespaces property as a set of prefix/URI pairs.
+	eq dm:namespace-nodes(e) = [] .
+	    --- Returns the value of the namespaces property as a sequence of Namespace Nodes. The order of Namespace Nodes is stable but implementation dependent.
+
+	eq dm:nilled(e) = false .
+	    --- Returns the value of the nilled property.
+
+	eq dm:node-kind(e) = "element" .
+---	    Returns “element”.
+
+	eq dm:node-name(element(eid,name, parent, children,attributes)) = qname(name) .
+	    --- Returns the value of the node-name property.
+
+	eq dm:parent(element(eid,name,parent, children,attributes)) = parent .
+	
+	eq dm:string-value(e) = "" .
+	    --- Returns the value of the string-value property.
+
+	eq dm:type-name(element(eid,name,parent,children,attributes)) = qname(name) .
+	    --- Returns the value of the type-name property.
+
+	eq dm:typed-value(e) = [] .
+	    --- Returns the value of the typed-value property.
+
+	eq dm:unparsed-entity-public-id(e) = uri("") .
+	    --- Returns the empty sequence.
+
+	eq dm:unparsed-entity-system-id(e) = uri("") .
+		    --- Returns the empty sequence.
+endfm)

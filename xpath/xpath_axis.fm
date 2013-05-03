@@ -1,0 +1,151 @@
+load xpath_base.fm
+
+(omod XPATH-AXIS is
+
+pr XPATH-BASE .
+
+var node : Node .
+var tid seqn num : Nat .	 
+var ns1 ns2 : NodeSequence .
+var ax : AxisType . 
+var nodename : Qid . 
+var stackid : Oid .
+var n : Int .
+var nid : Oid .
+
+***(		
+--- General axis rule
+)
+rl [axis-rule] :
+	(tid, num)[[ axis(ax, nodename) ]]
+   < tid : LState | seq : seqn, stack : stackid >
+   < stackid : Stack{Nat} | first : o(stackid, n) >
+   < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+   => 
+   < tid : LState | seq : seqn + 2 >
+   < stackid : Stack{Nat} | first : o(stackid, n + 2) >
+   < o(stackid, n + 2) : Node{Nat} | contents : seqn, next : o(stackid, n + 1) >
+   < o(stackid, n + 1) : Node{Nat} | contents : seqn + 1, next : nid >
+   maxis(tid, ax, nil, nodename, seqn)
+   mnodetest(tid, nodename, nil, seqn + 1)
+.	
+
+
+rl [maxis-nil1] :
+	maxis(tid, ax, nil, nodename, num)
+	< tid : LState | seq : seqn, (res : node), stack : stackid >
+    < stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+	< tid : LState | seq : seqn + 1, (res : [])  >
+    < stackid : Stack{Nat} | first : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn, next : nid >	 
+	maxis(tid, ax, node, nodename, seqn)
+.
+
+rl [maxis-nil2] :
+	maxis(tid, ax, nil, nodename, num)
+	< tid : LState | seq : seqn, (res : (ns1 node)), stack : stackid >
+    < stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+	< tid : LState | seq : seqn + 2, (res : ns1) > 
+	< stackid : Stack{Nat} | first : o(stackid, n + 2) >
+	< o(stackid, n + 2) : Node{Nat} | contents : seqn, next : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn + 1, next : nid >
+	maxis(tid, ax, nil, nodename, seqn) 
+	maxis(tid, ax, node, nodename, seqn + 1)
+.
+
+--- self axis
+rl [maxis-self] :
+	maxis(tid, self, node, nodename, num)
+	< tid : LState | seq : seqn, (res : ns1), stack : stackid >
+    < stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+	< tid : LState | seq : seqn + 1 >
+	< stackid : Stack{Nat} | first : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn, next : nid >
+	lock(tid, p, node, seqn).
+
+--- child axis
+rl [maxis-child] :
+	maxis(tid, child, node, nodename, num)
+	< tid : LState | seq : seqn, stack : stackid >
+    < stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+	< tid : LState | seq : seqn + 1 >
+	< stackid : Stack{Nat} | first : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn, next : nid >
+	lock(tid, p, dm:children(node), seqn)
+.
+
+--- parent axis
+rl [maxis-parent] :
+	maxis(tid, parent, node, nodename, num)
+	< tid : LState | seq : seqn, stack : stackid >
+    < stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >	
+	=> 
+	< tid : LState | seq : seqn + 1 >
+	< stackid : Stack{Nat} | first : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn, next : nid >
+	lock(tid, p, dm:parent(node), seqn)
+.
+
+
+--- nodetest
+rl [mnodetest-1node] :
+	mnodetest(tid, nodename, nil, num)
+	< tid : LState | seq : seqn, (res : node), stack : stackid >
+    < stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+	< tid : LState | seq : seqn + 1, (res : []) > 
+    < stackid : Stack{Nat} | first : o(stackid, n + 1) >
+    < o(stackid, n + 1) : Node{Nat} | contents : seqn, next : nid >	
+	mnodetest(tid,nodename,node,seqn) .
+
+rl [mnodetest-nodeseq] :
+	mnodetest(tid, nodename, nil, num)
+	< tid : LState | seq : seqn, (res : (ns1 node)), stack : stackid >
+    < stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+	< tid : LState | seq : seqn + 2, (res : ns1) > 
+    < stackid : Stack{Nat} | first : o(stackid, n + 2) >
+    < o(stackid, n + 2) : Node{Nat} | contents : seqn, next : o(stackid, n + 1) >
+    < o(stackid, n + 1) : Node{Nat} | contents : seqn + 1, next : nid >
+	mnodetest(tid,nodename,nil, seqn) 
+	mnodetest(tid,nodename,node, seqn + 1) .
+
+crl [mnodetest-test] :
+	mnodetest(tid, nodename, node, num)
+	< tid : LState | seq : seqn, (res : (ns1)), stack : stackid >
+	< stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+	< tid : LState | seq : seqn + 1, (res : (ns1 node)) >
+	< stackid : Stack{Nat} | first : nid > 
+	if dm:node-name(node) == qname(nodename) .
+
+
+
+	***(TODO
+	--- ReverseAxis
+	eq [[ axis(parent, nodename, node) ]](< g, lstate(ns) >) = node-test(nodename, [], Lock(dm:parent(node), P, < g, lstate(ns dm:parent(node)) >)) .
+
+	--- NodeTest
+	ceq node-test(nodename, [], st) = st if nodename == '* .
+	ceq node-test(nodename, [], < g, lstate(ns) >) = node-test(nodename, ns, < g, lstate([]) >) if nodename =/= '* .
+
+	ceq node-test(nodename, node, < g, lstate(ns2) >) = < g, lstate(ns2 node) > if dm:node-name(node) == qname(nodename) .
+	ceq node-test(nodename, node, < g, lstate(ns2) >) = < g, lstate(ns2) > if dm:node-name(node) =/= qname(nodename) .
+
+	ceq node-test(nodename, ns node, < g, lstate(ns2) >) = node-test(nodename, ns,< g, lstate(ns2 node) >) if dm:node-name(node) == qname(nodename) .
+	ceq node-test(nodename, ns node, < g, lstate(ns2) >) = node-test(nodename, ns,< g, lstate(ns2) >) if dm:node-name(node) =/= qname(nodename) .
+
+	)
+endom)

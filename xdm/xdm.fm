@@ -1,0 +1,12 @@
+load xdm_attribute.fm
+load xdm_document.fm
+load xdm_element.fm
+load xdm_text.fm
+
+(fmod XDM-ALL is
+  pr XDM-DOCUMENT .
+  pr XDM-ELEMENT .
+  pr XDM-ATTRIBUTE .
+  pr XDM-TEXT .
+endfm)
+

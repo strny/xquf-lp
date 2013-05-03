@@ -1,0 +1,224 @@
+load lock_table.fm
+
+(fmod LOCK-TABLE-XQUF is
+	pr LOCK-TABLE .
+	sorts P SI SIL SIF SIT SA SB X SR XT IS IX .
+	subsorts P SI SIL SIF SIT SA SB X SR XT IS IX < LockMode .
+	
+	op p : -> P [ctor] .
+	op si : -> SI [ctor] .
+	op sil : -> SIL [ctor] .
+	op sif : -> SIF [ctor] .
+	op sit : -> SIT [ctor] .
+	op sa : -> SA [ctor] .
+	op sb : -> SB [ctor] .
+	op x : -> X [ctor] .
+	op sr : -> SR [ctor] .
+	op xt : -> XT [ctor] .
+	op is : -> IS [ctor] .
+	op ix : -> IX [ctor] .
+	
+	var vp : P . var vsi : SI . var vsil : SIL . var vsif : SIF .
+	var vsit : SIT . var vsa : SA . var vsb : SB . var vx : X .
+	var vsr : SR . var vxt : XT . var vis : IS . var vix : IX . var l1,l2 : LockMode .
+	
+	eq getParentLock(vp) = p .
+	eq getParentLock(vsi) = is .
+	eq getParentLock(vsil) = is .
+	eq getParentLock(vsif) = is .
+	eq getParentLock(vsit) = is .
+	eq getParentLock(vsa) = is .
+	eq getParentLock(vsb) = is .
+	eq getParentLock(vx) = ix .
+	eq getParentLock(vsr) = is .
+	eq getParentLock(vxt) = x .
+	eq getParentLock(vis) = is .
+	eq getParentLock(vix) = ix .
+	
+	
+	eq convert(vp, l1) = l1 .	
+	eq convert(l1, vp) = l1 .
+
+	eq convert(vsi, x) = x .
+	eq convert(vsi, xt) = xt .
+	eq convert(vsi, is) = si .
+	
+	
+***(	
+	eq convert(vsi, vsil) = vsu .
+	eq convert(vsi, vsif) = vsu .
+	eq convert(vsi, vsit) = vsu .
+	eq convert(vsi, vsa) = vsu .
+	eq convert(vsi, vsb) = vsu .
+
+	eq convert(vsil, vsi) = vsu .
+	eq convert(vsil, vsif) = vsu .
+	eq convert(vsil, vsit) = vsu .
+	eq convert(vsil, vsa) = vsu .
+	eq convert(vsil, vsb) = vsu .
+)
+
+	
+	eq isCompatible(vp, l1) = true .
+	
+	eq isCompatible(vsi, vp) = true .
+	eq isCompatible(vsi, vsi) = false .
+	eq isCompatible(vsi, vsil) = false .
+	eq isCompatible(vsi, vsif) = false .
+	eq isCompatible(vsi, vsit) = true .
+	eq isCompatible(vsi, vsa) = true .
+	eq isCompatible(vsi, vsb) = true .
+	eq isCompatible(vsi, vx) = false .
+	eq isCompatible(vsi, vsr) = true .
+	eq isCompatible(vsi, vxt) = false .
+	eq isCompatible(vsi, vis) = true .
+	eq isCompatible(vsi, vix) = true .
+	
+
+	eq isCompatible(vsil, vp) = true .
+	eq isCompatible(vsil, vsi) = false .
+	eq isCompatible(vsil, vsil) = false .
+	eq isCompatible(vsil, vsif) = true .
+	eq isCompatible(vsil, vsit) = true .
+	eq isCompatible(vsil, vsa) = true .
+	eq isCompatible(vsil, vsb) = true .
+	eq isCompatible(vsil, vx) = false .
+	eq isCompatible(vsil, vsr) = true .
+	eq isCompatible(vsil, vxt) = false .
+	eq isCompatible(vsil, vis) = true .
+	eq isCompatible(vsil, vix) = true .
+	
+	
+	
+	eq isCompatible(vsif, vp) = true .
+	eq isCompatible(vsif, vsi) = false .
+	eq isCompatible(vsif, vsil) = true .
+	eq isCompatible(vsif, vsif) = true .
+	eq isCompatible(vsif, vsit) = true .
+	eq isCompatible(vsif, vsa) = true .
+	eq isCompatible(vsif, vsb) = true .
+	eq isCompatible(vsif, vx) = false .
+	eq isCompatible(vsif, vsr) = true .
+	eq isCompatible(vsif, vxt) = false .
+	eq isCompatible(vsif, vis) = true .
+	eq isCompatible(vsif, vix) = true .
+
+
+	eq isCompatible(vsit, vp) = true .
+	eq isCompatible(vsit, vsi) = true .
+	eq isCompatible(vsit, vsil) = true .
+	eq isCompatible(vsit, vsif) = false .
+	eq isCompatible(vsit, vsit) = false .
+	eq isCompatible(vsit, vsa) = true .
+	eq isCompatible(vsit, vsb) = true .
+	eq isCompatible(vsit, vx) = false .
+	eq isCompatible(vsit, vsr) = true .
+	eq isCompatible(vsit, vxt) = false .
+	eq isCompatible(vsit, vis) = true .
+	eq isCompatible(vsit, vix) = true .
+
+	eq isCompatible(vsa, vp) = true .
+	eq isCompatible(vsa, vsi) = true .
+	eq isCompatible(vsa, vsil) = true .
+	eq isCompatible(vsa, vsif) = true .
+	eq isCompatible(vsa, vsit) = true .
+	eq isCompatible(vsa, vsa) = false .
+	eq isCompatible(vsa, vsb) = true .
+	eq isCompatible(vsa, vx) = false .
+	eq isCompatible(vsa, vsr) = true .
+	eq isCompatible(vsa, vxt) = false .
+	eq isCompatible(vsa, vis) = true .
+	eq isCompatible(vsa, vix) = true .
+
+
+	eq isCompatible(vsb, vp) = true .
+	eq isCompatible(vsb, vsi) = true .
+	eq isCompatible(vsb, vsil) = true .
+	eq isCompatible(vsb, vsif) = true .
+	eq isCompatible(vsb, vsit) = true .
+	eq isCompatible(vsb, vsa) = true .
+	eq isCompatible(vsb, vsb) = false .
+	eq isCompatible(vsb, vx) = false .
+	eq isCompatible(vsb, vsr) = true .
+	eq isCompatible(vsb, vxt) = false .
+	eq isCompatible(vsb, vis) = true .
+	eq isCompatible(vsb, vix) = true .
+
+
+
+	eq isCompatible(vx, vp) = true .
+	eq isCompatible(vx, vsi) = false .
+	eq isCompatible(vx, vsil) = false .
+	eq isCompatible(vx, vsif) = false .
+	eq isCompatible(vx, vsit) = false .
+	eq isCompatible(vx, vsa) = false .
+	eq isCompatible(vx, vsb) = false .
+	eq isCompatible(vx, vx) = false .
+	eq isCompatible(vx, vsr) = false .
+	eq isCompatible(vx, vxt) = false .
+	eq isCompatible(vx, vis) = false .
+	eq isCompatible(vx, vix) = false .
+
+
+	eq isCompatible(vsr, vp) = true .
+	eq isCompatible(vsr, vsi) = true .
+	eq isCompatible(vsr, vsil) = true .
+	eq isCompatible(vsr, vsif) = true .
+	eq isCompatible(vsr, vsit) = true .
+	eq isCompatible(vsr, vsa) = true .
+	eq isCompatible(vsr, vsb) = true .
+	eq isCompatible(vsr, vx) = false .
+	eq isCompatible(vsr, vsr) = true .
+	eq isCompatible(vsr, vxt) = false .
+	eq isCompatible(vsr, vis) = true .
+	eq isCompatible(vsr, vix) = false .
+
+
+
+	eq isCompatible(vxt, vp) = true .
+	eq isCompatible(vxt, vsi) = false .
+	eq isCompatible(vxt, vsil) = false .
+	eq isCompatible(vxt, vsif) = false .
+	eq isCompatible(vxt, vsit) = false .
+	eq isCompatible(vxt, vsa) = false .
+	eq isCompatible(vxt, vsb) = false .
+	eq isCompatible(vxt, vx) = false .
+	eq isCompatible(vxt, vsr) = false .
+	eq isCompatible(vxt, vxt) = false .
+	eq isCompatible(vxt, vis) = false .
+	eq isCompatible(vxt, vix) = false .
+
+
+	eq isCompatible(vis, vp) = true .
+	eq isCompatible(vis, vsi) = true .
+	eq isCompatible(vis, vsil) = true .
+	eq isCompatible(vis, vsif) = true .
+	eq isCompatible(vis, vsit) = true .
+	eq isCompatible(vis, vsa) = true .
+	eq isCompatible(vis, vsb) = true .
+	eq isCompatible(vis, vx) = true .
+	eq isCompatible(vis, vsr) = true .
+	eq isCompatible(vis, vxt) = false .
+	eq isCompatible(vis, vis) = true .
+	eq isCompatible(vis, vix) = true .
+
+
+	eq isCompatible(vix, vp) = true .
+	eq isCompatible(vix, vsi) = true .
+	eq isCompatible(vix, vsil) = true .
+	eq isCompatible(vix, vsif) = true .
+	eq isCompatible(vix, vsit) = true .
+	eq isCompatible(vix, vsa) = true .
+	eq isCompatible(vix, vsb) = true .
+	eq isCompatible(vix, vx) = true .
+	eq isCompatible(vix, vsr) = false .
+	eq isCompatible(vix, vxt) = false .
+	eq isCompatible(vix, vis) = true .
+	eq isCompatible(vix, vix) = true .
+
+	eq isCompatible(l1, empty) = true .
+	eq isCompatible(l1, l2) = false .
+	
+endfm)
+	
+	

@@ -1,0 +1,14 @@
+(fmod COLORING is
+   sorts Result .
+
+   op BAD : -> Result [format (r! o)] .
+   op good : -> Result [format (g! o)] .
+
+	var B : Bool .
+	
+	op test : Bool  -> Result .
+	ceq test(B) = good if B .
+	eq test(B) = BAD [owise] . 
+endfm)
+
+

@@ -1,0 +1,9 @@
+(fmod TRANSACTION is
+	sort Transaction .
+	pr NAT .
+	op transaction : Nat -> Transaction [ctor] .
+endfm)
+
+(view Transaction from TRIV to TRANSACTION is
+	sort Elt to Transaction .
+endv)

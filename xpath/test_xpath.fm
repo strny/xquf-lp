@@ -1,0 +1,45 @@
+
+--- doc("books.xml")/bookstore/book/title
+--- Id, Name,Parent, Children, Attributes
+--- op element : Qid Qid Ref NodeSequence NodeSequence -> Element [ctor] .
+load xpath.fm
+load ../test/colored_result.fm
+--- Database Set{Lock} List{Transaction} WFG 
+
+(omod TEST-MODULE is
+	pr XPATH .
+	pr COLORING .
+	op init-g : -> Configuration .
+	
+	op init-g2 : -> Configuration .
+---	class GState | database : Database, locks : Set{Lock}, txs : Set{Transaction}, wfg : WFG, lastid : Nat .
+	eq init-g = < 'gs : GState | database : database(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []),[]),[]))), locks : empty, txs : empty , wfg : empty-wfg, lastid : 0 > .
+	
+	eq init-g2 = < 'gs : GState | database : database(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []),[]) element('1.1.2, 'book, ref('1.1), element('1.1.2.1, 'title, ref('1.1.2), [], []),[]),[]))), locks : empty, txs : empty , wfg : empty-wfg, lastid : 0 > .
+endom)
+
+---(rew init-g beginTrans('gs, doc(uri("books.xml"))) maxis(0,child,nil) .)
+(rew init-g beginTrans('gs, doc(uri("books.xml")) / axis(child,'bookstore)) .)
+
+(rew init-g beginTrans('gs, doc(uri("books.xml")) / axis(child,'bookstore) / axis(child, 'book)) .)
+
+(rew init-g2 beginTrans('gs, doc(uri("books.xml")) / axis(child,'bookstore) / axis(child, 'book)) .)
+
+
+(rew init-g2 beginTrans('gs, doc(uri("books.xml")) / axis(child,'bookstore) / axis(child, 'book)) beginTrans('gs, doc(uri("books.xml")) / axis(child,'bookstore) / axis(child, 'book)) beginTrans('gs, doc(uri("books.xml")) / axis(child,'bookstore) / axis(child, 'book)) .)
+
+***(
+(red test([[ doc(uri("books.xml")) ]](< init-g, lstate([]) >) == < init-g,lstate(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []), []), []))) >) .)
+
+(red test([[ doc(uri("books.xml")) / axis(child, 'bookstore, nil) ]](< init-g, lstate([]) >) == < init-g,lstate(element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []), []), [])) >) .)
+
+(red test([[ doc(uri("books.xml")) / axis(child, 'bookstore, nil) / axis(child, 'book, nil) ]](< init-g, lstate([]) >) == < init-g,lstate(element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []), [])) >) .)
+
+(red test([[ doc(uri("books.xml")) / axis(child, '*, nil) / axis(child, 'book, nil) ]](< init-g, lstate([]) >) == < init-g,lstate(element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []), [])) >) .)
+
+(red test([[ doc(uri("books.xml")) / axis(child, '*, nil) / axis(child, 'book, nil) / axis(self, 'book, nil)]](< init-g, lstate([]) >) == < init-g,lstate(element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []), [])) >) .)
+
+(red test([[ doc(uri("books.xml")) / axis(child, '*, nil) / axis(child, 'book, nil) / axis(child, '*, nil)]](< init-g2, lstate([]) >) 
+== < init-g2, lstate(element('1.1.1.1, 'title, ref('1.1.1), [], []) element('1.1.2.1, 'title, ref('1.1.2), [], [])) >) 
+.)
+)

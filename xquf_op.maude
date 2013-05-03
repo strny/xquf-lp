@@ -1,0 +1,40 @@
+fmod XQUF-PRIMITIVES is
+	*** Inserts $content immediately before $target.
+	op upd:insertBefore : Node NodeSequence -> Node .
+	
+	*** Inserts $content immediately after $target.
+	op upd:insertAfter : Node NodeSequence -> Node .
+	
+	*** Inserts $content as the children of $target, in an implementation-dependent position.
+	op upd:insertInto : Node NodeSequence -> Node .
+	
+	*** Inserts $content as the first children of $target.
+	op upd:insertIntoAsFirst : Node NodeSequence -> Node .
+	
+	*** Inserts $content as the last children of $target.
+	op upd:insertIntoAsLast : Node NodeSequence -> Node .
+	
+***	op upd:insertAttributes : Node NodeSequence -> Node .
+	
+	*** Deleted nodes are detached from their parent nodes; however, a node deletion has no effect on variable bindings or on the set of available documents or collections during processing of the current query.
+	op upd:delete : Node -> Node .
+
+	*** Replaces $target with $replacement.
+	op upd:replaceNode : Node NodeSequence -> Node .
+	
+	*** Replaces the string value of $target with $string-value.
+	op upd:replaceValue : Node String -> Node .
+
+***	op upd:replaceElementContent : Node 
+
+	*** Changes the node-name of $target to $newName.
+	op upd:rename : Node Qid -> Node .
+	
+	*** The XDM node tree rooted at $node is stored to the location specified by $uri.
+	op upd:put : Node String -> Node .
+	
+	*** Merges two pending update lists.
+	op upd:mergeUpdates : PUL PUL -> PUL .
+	
+	op upd:applyUpdates : PUL String Bool -> Node .
+endfm

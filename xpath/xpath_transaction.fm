@@ -1,0 +1,63 @@
+load xpath_base.fm
+load ../transactions/lock_operations.fm
+
+(omod XPATH-TRANSACTION is
+pr XPATH-BASE .
+pr LOCK-OPERATIONS .
+
+
+var tid lid seqn num : Nat .	 
+var nodename : Qid . 
+var node : Node .
+var e : Expr .
+var gsid : Oid .
+var txss : Set{Transaction} .
+var stackid : Oid .
+var n : Int .
+var nid : Oid .
+var lMode : LockMode .
+var ll : Set{Lock} .
+var ns1 : NodeSequence .
+
+rl [beginTrans] :
+	beginTrans(gsid, e)
+	< gsid : GState | txs : txss, lastid : lid >	
+	=> 
+	< gsid : GState | txs : union(txss, transaction(lid)), lastid : lid + 1 > 
+	< lid : LState | tx : transaction(lid), (res : []), gs : gsid, seq : 2, stack : qid(string(lid,10) + "-STACK") >
+	< qid(string(lid,10) + "-STACK") : Stack{Nat} | first : o(qid(string(lid,10) + "-STACK"), 2) >
+	< o(qid(string(lid,10) + "-STACK"), 2) : Node{Nat} | contents : 0, next : o(qid(string(lid,10) + "-STACK"), 1) >
+	< o(qid(string(lid,10) + "-STACK"), 1) : Node{Nat} | contents : 1, next : null >
+	(lid, 0)[[ e ]] 
+	--- lock(lid, lockMode, 1)
+.
+
+rl [lock-nodesequence] :
+	lock(tid, lMode, (ns1 node), num)
+	< tid : LState | seq : seqn, stack : stackid, gs : gsid >
+	< gsid : GState | txs : txss, lastid : lid >
+	< stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=>
+	< tid : LState | seq : seqn + 2, stack : stackid >
+	< gsid : GState | txs : txss, lastid : lid >
+	< stackid : Stack{Nat} | first : o(stackid, n + 2) >
+    < o(stackid, n + 2) : Node{Nat} | contents : seqn, next : o(stackid, n + 1) >
+    < o(stackid, n + 1) : Node{Nat} | contents : seqn + 1, next : nid >
+	lock(tid, lMode, ns1, seqn)
+	lock(tid, lMode, node, seqn + 1)
+.
+
+crl [lock] :
+	lock(tid, lMode, node, num)
+	< tid : LState | seq : seqn, (res : ns1), stack : stackid, gs : gsid >
+	< gsid : GState | txs : txss, lastid : lid, locks : ll >
+	< stackid : Stack{Nat} | first : o(stackid, n) >
+    < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=>
+	< tid : LState | seq : seqn, (res : (ns1 node)), stack : stackid >
+	< gsid : GState | txs : txss, lastid : lid, locks : addAndConvert(ll, lock(node, lMode, transaction(tid))) >
+	< stackid : Stack{Nat} | first : nid >
+	if compatible(transaction(tid), lock(node, lMode, transaction(tid)), ll)
+.
+endom)

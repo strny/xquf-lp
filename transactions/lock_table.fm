@@ -1,0 +1,22 @@
+(fmod LOCK-MODE is
+	sort LockMode .
+	op lockMode : -> LockMode [ctor] .
+endfm)
+
+(view LockMode from TRIV to LOCK-MODE is 
+	sort Elt to LockMode . 
+endv)
+
+
+(fmod LOCK-TABLE is
+	pr LOCK-MODE .
+	pr BOOL .
+	pr SET{LockMode} .
+
+	op isCompatible : LockMode LockMode -> Bool .
+	*** co na co
+	op convert : LockMode LockMode -> LockMode .
+	op getParentLock : LockMode -> LockMode .
+endfm)
+	
+	

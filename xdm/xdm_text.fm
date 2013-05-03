@@ -1,0 +1,59 @@
+load xdm_node.fm
+load xdm_element.fm
+
+(fmod XDM-TEXT is
+	pr XDM-NODE .
+	--- 6.7 Text Nodes
+	--- 6.7.1 Overview
+	--- 
+	--- Text Nodes encapsulate XML character content. Text has the following properties:
+	--- 
+	---     content
+	--- 
+	---     parent, possibly empty.
+	---
+	op text : String Ref -> Text [ctor] .
+	--- Text Nodes must satisfy the following constraint:
+	--- 
+	---     If the parent of a text node is not empty, the Text Node must not contain the zero-length string as its content.
+	--- 
+	--- In addition, Document and Element Nodes impose the constraint that two consecutive Text Nodes can never occur as adjacent siblings. When a Document or Element Node is constructed, Text Nodes that would be adjacent must be combined into a single Text Node. If the resulting Text Node is empty, it must never be placed among the children of its parent, it is simply discarded.
+	--- 6.7.2 Accessors
+	var t : Text .
+	var val : String .
+	var par : Ref .
+	eq dm:attributes(t) = [] .
+	    --- Returns the empty sequence.
+	eq dm:base-uri(text(val, par)) = dm:base-uri(par) .
+	    --- If the Text Node has a parent, returns the value of the dm:base-uri of its parent; otherwise, returns the empty sequence.
+	eq dm:children(t) = [] .
+	    --- Returns the empty sequence.
+	eq dm:document-uri(t) = uri("") .
+	    --- Returns the empty sequence.
+	eq dm:is-id(t) = false .
+	    --- Returns the empty sequence.
+	eq dm:is-idrefs(t) = false . 
+	    --- Returns the empty sequence.
+	eq dm:namespace-bindings(t) = ' .
+	    --- Returns the empty sequence.
+	eq dm:namespace-nodes(t) = [] .
+	    --- Returns the empty sequence.
+	eq dm:nilled(t) = false .
+	    --- Returns the empty sequence.
+	eq dm:node-kind(t) = "text" .
+	    --- Returns “text”.
+	eq dm:node-name(t) = qname(') .
+	    --- Returns the empty sequence.
+	eq dm:parent(text(val,par)) = par .
+	    --- Returns the value of the parent property.
+	eq dm:string-value(text(val,par)) = val .
+	    --- Returns the value of the content property.
+	eq dm:type-name(t) = qname('xs:untypedAtomic) .
+	    --- Returns xs:untypedAtomic.
+	eq dm:typed-value(text(val,par)) = untypedAtomic(val) .
+	    --- Returns the value of the content property as an xs:untypedAtomic.
+	eq dm:unparsed-entity-public-id(t) = uri("") .
+	    --- Returns the empty sequence.
+	eq dm:unparsed-entity-system-id(t) = uri("") .
+	    --- Returns the empty sequence.
+endfm)

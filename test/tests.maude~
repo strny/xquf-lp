@@ -1,0 +1,6 @@
+load '../node.maude'
+
+red addLock(addLock(node(lock) lock) lock) .
+red getChildren(node(lock node(lock))) .
+
+

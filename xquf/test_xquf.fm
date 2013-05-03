@@ -1,0 +1,14 @@
+load xquf.fm
+
+(fmod TEST-MODULE is
+	pr XQUF .
+	op init-g : -> GState .
+	
+	op init-g2 : -> GState .
+	
+	eq init-g = gstate(database(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []),[]),[]))), empty, transaction('1), empty-wfg) .
+	
+	eq init-g2 = gstate(database(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []),[]) element('1.1.2, 'book, ref('1.1), element('1.1.2.1, 'title, ref('1.1.2), [], []),[]),[]))), empty, transaction('1), empty-wfg) .
+endfm)
+
+red [[ insert node axis(child, 'bookstore, nil) as first into axis(child, 'bookstore, nil) ]](< init-g, lstate([]) >) .
