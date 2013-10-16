@@ -1,53 +1,9 @@
---- load ../xdm/xdm.fm
-
-load ../xpath/xpath.fm
-load ../xdm/xdm.fm
+--- load xquf_base.fm
+load xquf_insert.fm
 load ../database/database.fm
+load ../xdm/xdm.fm
 
-(fmod XQUF is
-	pr XPATH .
-	
-	sorts XQUFExpr InsertExpr DeleteExpr ReplaceExpr RenameExpr .
-	subsort XQUFExpr < Expr .
-	subsort InsertExpr < XQUFExpr .
-	subsort DeleteExpr < XQUFExpr .
-	subsort ReplaceExpr < XQUFExpr .
-	subsort RenameExpr < XQUFExpr .
-	
-	--- op ins : XPathExpr XPathExpr -> InsertExpr [ctor] .
----	op `[`[_`]`]`(_`) : InsertExpr State -> State [ditto] .
----	op insertNode : XPathExpr XPathExpr -> InsertExpr [ctor] .
-	op insertNode_asFirstInto_ : XPathExpr XPathExpr -> InsertExpr [ctor] .
-	op insertNode_asLastInto_ : XPathExpr XPathExpr -> InsertExpr [ctor] .
-    op insertNode_into_ : XPathExpr XPathExpr -> InsertExpr [ctor] .
-	op insertNode_before_ : XPathExpr XPathExpr -> InsertExpr [ctor] .
-	op insertNode_after_ : XPathExpr XPathExpr -> InsertExpr [ctor] .
-	
-	op deleteNode_ : XPathExpr -> DeleteExpr [ctor] .
-	
-	op replaceNode_with_ : XPathExpr XPathExpr -> ReplaceExpr [ctor] .
-	op replaceValueOfNode_with_ : XPathExpr XPathExpr -> ReplaceExpr [ctor] .
-	
-	op renameNode_as_ : XPathExpr XPathExpr -> RenameExpr [ctor] .
-
-	var se : XPathExpr . var st : State . var g : GState . var L : LState .
-	var te : XPathExpr . var x : Expr .
-
-	--- INSERT
-	eq [[ insertNode se asFirstInto te ]](st) = st .
-	eq [[ insertNode se asLastInto te ]](st) = st .
-	eq [[ insertNode se into te ]](st) = st .
-	eq [[ insertNode se before te ]](st) = st .
-	eq [[ insertNode se after te ]](st) = st .
-
-	--- DELETE	
-	eq [[ deleteNode te ]](st) = st .
-	
-	--- REPLACE
-	eq [[ replaceNode te with se ]](st) = st .
-	eq [[ replaceValueOfNode te with se ]](st) = st .
-	
-	--- RENAME
-	eq [[ renameNode te as se ]](st) = st .
-
-endfm)
+(omod XQUF is
+	pr XQUF-BASE .
+	pr XQUF-INSERT .
+endom)

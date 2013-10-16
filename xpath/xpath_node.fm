@@ -13,15 +13,22 @@ var nid : Oid .
 --- TODO DODELAT :-) OUYEEEE
 rl [constructor-element] :
 	(tid, num)[[ node ]]
-   < tid : LState | seq : seqn >
+   < tid : LState | seq : seqn, stack : stackid >
+   < stackid : Stack{Nat} | first : o(stackid, n) >
+   < o(stackid, n) : Node{Nat} | contents : num, next : nid >
 	=> 
 	< tid : LState | seq : seqn + 1 >
+	< stackid : Stack{Nat} | first : o(stackid, n + 1) >
+	< o(stackid, n + 1) : Node{Nat} | contents : seqn, next : nid >
 	mnode(tid, node, seqn) .
 			
 rl [mnode] :
    mnode(tid, node, num)
-   < tid : LState | seq : seqn, (res : ns1) >
-   => 
-   < tid : LState | seq : seqn,(res : (ns1 node)) >
+   < tid : LState | seq : seqn, (res : ns1), stack : stackid >
+   < stackid : Stack{Nat} | first : o(stackid, n) >
+   < o(stackid, n) : Node{Nat} | contents : num, next : nid >
+	=> 
+   < tid : LState | seq : seqn + 1, (res : (ns1 node)) >
+   < stackid : Stack{Nat} | first : nid >	
 .
 endom)

@@ -27,7 +27,7 @@ load wfg.fm
 	op database : Document -> Database [ctor] .
 		
 	class GState | database : Database, locks : Set{Lock}, txs : Set{Transaction}, wfg : WFG, lastid : Nat .
-	class LState | tx : Transaction, res : NodeSequence, gs : Oid, seq : Nat, stack : Oid .
+	class LState | tx : Transaction, res : NodeSequence, op1 : NodeSequence, op2 : NodeSequence, gs : Oid, seq : Nat, stack : Oid .
 	
 endom)
 ***(

@@ -1,14 +1,22 @@
-load xquf.fm
+***load xquf.fm
+load ../test/colored_result.fm
+load ../xpath/xpath.fm
+load xquf_insert.fm
 
-(fmod TEST-MODULE is
-	pr XQUF .
-	op init-g : -> GState .
+(omod TEST-MODULE is
+	pr XPATH .
+	pr XQUF-INSERT .
+	pr COLORING .
+	op init-g : -> Configuration .
+	op init-g2 : -> Configuration .
+---	class GState | database : Database, locks : Set{Lock}, txs : Set{Transaction}, wfg : WFG, lastid : Nat .
+	eq init-g = < 'gs : GState | database : database(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []),[]),[]))), locks : empty, txs : empty , wfg : empty-wfg, lastid : 0 > .
 	
-	op init-g2 : -> GState .
-	
-	eq init-g = gstate(database(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []),[]),[]))), empty, transaction('1), empty-wfg) .
-	
-	eq init-g2 = gstate(database(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []),[]) element('1.1.2, 'book, ref('1.1), element('1.1.2.1, 'title, ref('1.1.2), [], []),[]),[]))), empty, transaction('1), empty-wfg) .
-endfm)
+	eq init-g2 = < 'gs : GState | database : database(document('1, uri("books.xml"), element('1.1, 'bookstore, ref('1), element('1.1.1, 'book, ref('1.1), element('1.1.1.1, 'title, ref('1.1.1), [], []),[]) element('1.1.2, 'book, ref('1.1), element('1.1.2.1, 'title, ref('1.1.2), [], []),[]),[]))), locks : empty, txs : empty , wfg : empty-wfg, lastid : 0 > .
+endom)
 
-red [[ insert node axis(child, 'bookstore, nil) as first into axis(child, 'bookstore, nil) ]](< init-g, lstate([]) >) .
+---(rew init-g beginTrans('gs, doc(uri("books.xml"))) maxis(0,child,nil) .)
+--- (rew init-g beginTrans('gs, doc(uri("books.xml")) / axis(child,'bookstore)) .)
+(rew init-g beginTrans('gs, insertNode (newElement('1.1, 'book, [], []))  asFirstInto (doc(uri("books.xml")) / axis(child,'bookstore))) .)
+
+--- red [[ insert node axis(child, 'bookstore, nil) as first into axis(child, 'bookstore, nil) ]](< init-g, lstate([]) >) .

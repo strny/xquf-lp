@@ -34,6 +34,7 @@ load xdm_node.fm
 	
 	--- Id, Name,Parent, Children, Attributes
 	op element : Qid Qid Ref NodeSequence NodeSequence -> Element [ctor] .
+	op newElement : Qid Qid NodeSequence NodeSequence -> Element [ctor] .
 	--- op element : Qid Node -> Element [ctor] .
 	
 	op nilElement : -> Element [ctor] .
